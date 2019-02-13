@@ -31,7 +31,14 @@ if (
 }
 
 const connection = mysql.createConnection(options);
-
+//https://github.com/mysqljs/mysql/issues/832
+const del = connection._protocol._delegateError;
+connection._protocol._delegateError = function(err, sequence){
+  if (err.fatal) {
+    console.trace('fatal error: ' + err.message);
+  }
+  return del.call(this, err, sequence);
+};
 // [START list]
 function list(limit, token, cb) {
   token = token ? parseInt(token, 10) : 0;
